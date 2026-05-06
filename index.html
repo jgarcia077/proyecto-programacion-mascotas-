@@ -1,0 +1,129 @@
+<!-- Documento HTML5 -->
+<!doctype html>
+<!-- lang="es-CO": accesibilidad y pronunciación correcta de lectores de pantalla -->
+<html lang="es-CO">
+  <head>
+    <!-- UTF-8: soporte de tildes, ñ y caracteres especiales -->
+    <meta charset="utf-8" />
+    <!-- Compatibilidad con el motor de renderizado más moderno -->
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <!-- Responsivo: el layout se adapta al dispositivo -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Título visible en la pestaña del navegador -->
+    <title>AdoptaMascotasApp</title>
+    <!-- Descripción para motores de búsqueda -->
+    <meta name="description" content="Sistema web de adopción de mascotas — Centro de Adopción Pereira. Gestiona mascotas, clientes y adopciones." />
+    <!-- Hoja de estilos principal (separación de responsabilidades HTML/CSS) -->
+    <link rel="stylesheet" href="./css/styles.css" />
+    <!-- Estilos adicionales propios de la app de adopciones -->
+    <link rel="stylesheet" href="./css/adopcion.css" />
+  </head>
+  <body>
+    <!-- Skip link: accesibilidad con teclado -->
+    <a class="skip-link" href="#main" data-tooltip="Accesibilidad: saltar al contenido principal">
+      Saltar al contenido principal
+    </a>
+
+    <!-- Contenedor principal de la app con soporte de tema oscuro/claro -->
+    <div class="app" data-theme="dark">
+
+      <!-- ===== TOPBAR ===== -->
+      <header class="topbar" aria-label="Barra superior">
+        <!-- Botón hamburguesa: muestra/oculta el sidebar -->
+        <button
+          class="icon-button"
+          type="button"
+          id="sidebarToggle"
+          aria-controls="sidebar"
+          aria-expanded="true"
+          aria-label="Mostrar u ocultar el menú lateral"
+          data-tooltip="Menú: mostrar u ocultar"
+        >
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <!-- Título e identidad de la app -->
+        <div class="topbar__title">
+          <span class="brand">🐾 AdoptaMascotasApp</span>
+          <span class="version" id="appVersionBadge" aria-label="Versión">v--</span>
+        </div>
+
+        <!-- Zona de acciones (derecha del topbar) -->
+        <div class="topbar__actions" aria-label="Acciones de la barra superior">
+          <button class="pill" type="button" aria-label="Centro de Adopción Pereira" data-tooltip="Centro de Adopción — Pereira, Risaralda" disabled>
+            Pereira
+          </button>
+        </div>
+      </header>
+
+      <!-- Punto de montaje del menú lateral (se inyecta desde menuPrincipal.js) -->
+      <div id="menuPrincipalMount"></div>
+
+      <!-- Overlay móvil: oscurece el fondo al abrir el sidebar -->
+      <div class="overlay" id="overlay" hidden aria-hidden="true"></div>
+
+      <!-- ===== CONTENIDO PRINCIPAL ===== -->
+      <main class="main" id="main" tabindex="-1" aria-label="Contenido principal">
+        <!-- Panel de bienvenida (pantalla de inicio) -->
+        <div class="welcome-panel" id="welcomePanel">
+          <div class="welcome-panel__icon" aria-hidden="true">🐾</div>
+          <h1 class="welcome-panel__title">Centro de Adopción de Mascotas</h1>
+          <p class="welcome-panel__subtitle">Pereira, Risaralda — Sistema de Gestión v1.1</p>
+          <p class="welcome-panel__desc">
+            Selecciona una opción del menú lateral para comenzar a gestionar
+            <strong>Mascotas</strong>, <strong>Clientes</strong> o <strong>Adopciones</strong>.
+          </p>
+          <div class="welcome-panel__stats" id="welcomeStats" aria-label="Estadísticas del centro">
+            <div class="stat-card">
+              <span class="stat-card__number" id="statMascotas">--</span>
+              <span class="stat-card__label">Mascotas</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card__number" id="statClientes">--</span>
+              <span class="stat-card__label">Clientes</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card__number" id="statAdopciones">--</span>
+              <span class="stat-card__label">Adopciones</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ===== TOAST (notificación temporal) ===== -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- ===== MODAL: Confirmar cierre de sesión ===== -->
+    <div class="modalOverlay" id="logoutModal" hidden aria-hidden="true" aria-label="Confirmación de cierre de sesión">
+      <div class="modalDialog" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" aria-describedby="logoutText">
+        <h2 class="modalDialog__title" id="logoutTitle">Cerrar Sesión</h2>
+        <p class="modalDialog__text" id="logoutText">¿Está seguro de cerrar la sesión?</p>
+        <div class="modalDialog__actions">
+          <button class="button button--danger" type="button" id="logoutYes" data-tooltip="Confirmar y salir">Sí</button>
+          <button class="button" type="button" id="logoutNo" data-tooltip="Cancelar y volver al sistema">No</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCRIPTS (orden de carga: ENV → libs → módulos → arranque) ===== -->
+    <!--
+      defer: los scripts se descargan en paralelo pero se ejecutan
+      después de que el HTML esté completamente analizado.
+      Esto garantiza que el DOM exista cuando los scripts corren.
+    -->
+    <script src="./js/ENV.js" defer></script>
+    <script src="./js/librerias.js" defer></script>
+    <script src="./js/librerias_adopcion.js" defer></script>
+    <script src="./js/menuPrincipal.js" defer></script>
+    <script src="./js/crearClientes.js" defer></script>
+    <script src="./js/listarClientes.js" defer></script>
+    <script src="./js/crearMascota.js" defer></script>
+    <script src="./js/listarMascotas.js" defer></script>
+    <script src="./js/crearAdopcion.js" defer></script>
+    <script src="./js/listarAdopciones.js" defer></script>
+    <script src="./js/app.js" defer></script>
+  </body>
+</html>
