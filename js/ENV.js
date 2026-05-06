@@ -127,11 +127,11 @@ const vacunasMascota = [
 
 /* Entidad: Clientes */
 const clientes = [
-  { idCliente: 1,  identificacion: "1000000001", nombre: "Ana María Pérez",        direccion: "Calle 10 # 12-34 Apto 202", idDepartamento: 66, idMunicipio: 66001, idBarrio: 1,  whatsapp: "3001234567", telefono: "6041234", email: "ana.perez@correo.com",      fechaCreacion: "2024-01-15" },
-  { idCliente: 2,  identificacion: "1000000002", nombre: "Juan David Gómez",        direccion: "Carrera 7 # 20-15",         idDepartamento: 66, idMunicipio: 66001, idBarrio: 2,  whatsapp: "3012345678", telefono: null,       email: "juan.gomez@correo.com",      fechaCreacion: "2024-02-10" },
-  { idCliente: 3,  identificacion: "1000000003", nombre: "Luisa Fernanda Rodríguez",direccion: "Avenida 30 # 5-10",         idDepartamento: 66, idMunicipio: 66001, idBarrio: 3,  whatsapp: "3023456789", telefono: "6078901", email: "luisa.rodriguez@correo.com", fechaCreacion: "2024-03-08" },
-  { idCliente: 4,  identificacion: "1000000004", nombre: "Carlos Andrés Martínez",  direccion: "Calle 22 # 8-45",           idDepartamento: 66, idMunicipio: 66001, idBarrio: 4,  whatsapp: "3034567890", telefono: null,       email: "carlos.martinez@correo.com", fechaCreacion: "2024-04-12" },
-  { idCliente: 5,  identificacion: "1000000005", nombre: "Sofía Alejandra López",   direccion: "Diagonal 15 # 9-30",        idDepartamento: 66, idMunicipio: 66001, idBarrio: 5,  whatsapp: "3045678901", telefono: "6034567", email: "sofia.lopez@correo.com",     fechaCreacion: "2024-05-20" },
+  { idCliente: 1,  identificacion: "1000000001", nombres: "Ana María Pérez",        direccion: "Calle 10 # 12-34 Apto 202", idDepartamento: 66, idMunicipio: 66001, idBarrio: 1,  whatsapp: "3001234567", telefono: "6041234", email: "ana.perez@correo.com",      fechaCreacion: "2024-01-15" },
+  { idCliente: 2,  identificacion: "1000000002", nombres: "Juan David Gómez",        direccion: "Carrera 7 # 20-15",         idDepartamento: 66, idMunicipio: 66001, idBarrio: 2,  whatsapp: "3012345678", telefono: null,       email: "juan.gomez@correo.com",      fechaCreacion: "2024-02-10" },
+  { idCliente: 3,  identificacion: "1000000003", nombres: "Luisa Fernanda Rodríguez",direccion: "Avenida 30 # 5-10",         idDepartamento: 66, idMunicipio: 66001, idBarrio: 3,  whatsapp: "3023456789", telefono: "6078901", email: "luisa.rodriguez@correo.com", fechaCreacion: "2024-03-08" },
+  { idCliente: 4,  identificacion: "1000000004", nombres: "Carlos Andrés Martínez",  direccion: "Calle 22 # 8-45",           idDepartamento: 66, idMunicipio: 66001, idBarrio: 4,  whatsapp: "3034567890", telefono: null,       email: "carlos.martinez@correo.com", fechaCreacion: "2024-04-12" },
+  { idCliente: 5,  identificacion: "1000000005", nombres: "Sofía Alejandra López",   direccion: "Diagonal 15 # 9-30",        idDepartamento: 66, idMunicipio: 66001, idBarrio: 5,  whatsapp: "3045678901", telefono: "6034567", email: "sofia.lopez@correo.com",     fechaCreacion: "2024-05-20" },
 ];
 
 /* Entidad: Usuarios del sistema */
