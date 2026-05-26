@@ -12,6 +12,14 @@
    ============================================================ */
 "use strict";
 
+/* ============================================================
+   PASO 1: Cargar datos guardados ANTES de inicializar módulos.
+   Así los arrays globales (clientes, mascotas, adopciones…)
+   ya tienen los datos reales cuando cada módulo llama a
+   updateClientesCountBadges(), updateMascotasCountBadges(), etc.
+   ============================================================ */
+cargarDatosDesdeLocalStorage();
+
 /* ── Elementos base del layout ── */
 const appRoot            = document.querySelector(".app");
 const sidebarToggleBtn   = document.getElementById("sidebarToggle");
@@ -310,3 +318,9 @@ initializeListAdopcionesFeature({
    INICIALIZAR PANEL DE BIENVENIDA
    ============================================================ */
 updateWelcomeStats();
+
+/* ============================================================
+   PERSISTENCIA: cargar datos guardados y activar auto-guardado
+   Debe ser la última llamada después de inicializar todos los módulos.
+   ============================================================ */
+inicializarPersistencia();

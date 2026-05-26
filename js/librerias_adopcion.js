@@ -2,6 +2,33 @@
    LIBRERIAS_ADOPCION.JS
    Funciones globales adicionales para AdoptaMascotasApp.
    Extiende librerias.js sin modificarlo (se carga después).
+
+   RESUMEN DE RESPONSABILIDADES:
+     - closeAllAppModals / syncWelcomePanelVisibility:
+         Cierra todos los modales activos y sincroniza la visibilidad
+         del panel de bienvenida (#welcomePanel).
+     - openModal / closeModal (override):
+         Envuelve las funciones originales para mantener sincronizado
+         el panel de bienvenida al abrir/cerrar cualquier modal.
+     - Helpers de especies y razas:
+         getEspecieNombreById, getRazaNombreById, getEspecieIdByRazaId,
+         getRazasByEspecieId — acceso rápido a los catálogos de ENV.js.
+     - Helpers de mascotas:
+         isMascotaChipRegistered, getNextMascotaId, isMascotaAdoptada,
+         getMascotasDisponibles, getEspecieClass.
+     - Helpers de adopciones:
+         getNextAdopcionId, getNextMascotaAdoptadaId.
+     - Módulo Crear Mascota:
+         initializeCreateMascotaFeature y sus handlers/validadores.
+     - Módulo Listar Mascotas:
+         initializeListMascotasFeature y renderListMascotas.
+     - Módulo Crear Adopción:
+         initializeCreateAdopcionFeature y sus handlers/validadores.
+         Al guardar, crea el cliente automáticamente si no existe.
+     - Módulo Listar Adopciones:
+         initializeListAdopcionesFeature y renderListAdopciones.
+     - Panel de bienvenida:
+         updateWelcomeStats actualiza los contadores en tiempo real.
    ============================================================ */
 "use strict";
 
