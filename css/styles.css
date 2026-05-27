@@ -1603,3 +1603,312 @@ body.modal-open {
     scroll-behavior: auto;
   }
 }
+
+/* ================================================================
+   CORRECCIONES MODO CLARO (data-theme="light")
+   Sobreescribe colores hardcodeados que no usan variables CSS
+   y que quedan ilegibles sobre fondo claro.
+   ================================================================ */
+
+/* ── Sidebar: secciones del nav con fondo azul hardcodeado ── */
+.app[data-theme="light"] .nav__item--primary {
+  background: rgba(21, 101, 192, 0.08);
+  color: var(--text);
+}
+
+.app[data-theme="light"] .nav__item--primary:hover {
+  background: rgba(21, 101, 192, 0.15);
+}
+
+/* ── Nav actions (botones del menú) ── */
+.app[data-theme="light"] .nav__action {
+  color: var(--text);
+  background: transparent;
+  border-color: transparent;
+}
+
+.app[data-theme="light"] .nav__action:hover {
+  background: var(--hover);
+  color: var(--primary);
+}
+
+/* ── Iconos SVG del sidebar ── */
+.app[data-theme="light"] .nav__item svg,
+.app[data-theme="light"] .nav__action svg {
+  stroke: var(--text);
+}
+
+/* ── Avatar fallback: texto blanco sobre azul → oscuro sobre claro ── */
+.app[data-theme="light"] .avatar__fallback {
+  color: var(--primary);
+  background: rgba(21, 101, 192, 0.12);
+}
+
+/* ── Switch toggle: borde y fondo en modo claro ── */
+.app[data-theme="light"] .switch input:checked + .switch__track {
+  background: rgba(21, 101, 192, 0.2);
+  border-color: rgba(21, 101, 192, 0.5);
+}
+
+/* ── Inputs y selects: fondo y texto adaptados al tema ── */
+.app[data-theme="light"] .formControl,
+.app[data-theme="light"] .formSelect,
+.app[data-theme="light"] .formTextarea {
+  background: #ffffff;
+  color: rgba(12, 20, 36, 0.92);
+  border-color: rgba(12, 20, 36, 0.2);
+}
+
+.app[data-theme="light"] .formControl::placeholder,
+.app[data-theme="light"] .formTextarea::placeholder {
+  color: rgba(12, 20, 36, 0.45);
+}
+
+.app[data-theme="light"] .formControl:focus,
+.app[data-theme="light"] .formSelect:focus,
+.app[data-theme="light"] .formTextarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
+}
+
+/* ── Errores de campo: rojo más oscuro legible en fondo claro ── */
+.app[data-theme="light"] .fieldError {
+  color: #c62828;
+}
+
+/* ── Topbar: texto y botones ── */
+.app[data-theme="light"] .topbar {
+  color: var(--text);
+}
+
+.app[data-theme="light"] .topbar .icon-button {
+  color: var(--text);
+}
+
+.app[data-theme="light"] .topbar .icon-button:hover {
+  background: var(--hover);
+}
+
+/* ── Badge de versión ── */
+.app[data-theme="light"] .versionBadge {
+  background: rgba(21, 101, 192, 0.12);
+  color: var(--primary);
+  border-color: rgba(21, 101, 192, 0.25);
+}
+
+/* ── Botón genérico: texto visible en modo claro ── */
+.app[data-theme="light"] .button {
+  color: var(--text);
+  background: var(--control);
+  border-color: var(--border);
+}
+
+.app[data-theme="light"] .button:hover:not(:disabled) {
+  background: var(--hover);
+  border-color: rgba(21, 101, 192, 0.3);
+}
+
+/* ── Tabla de clientes: header y celdas ── */
+.app[data-theme="light"] .clientsTable__header {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.app[data-theme="light"] .clientsTable__row {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.app[data-theme="light"] .clientsTable__row:hover {
+  background: var(--surface-2);
+}
+
+/* ── Filas de adopción ── */
+.app[data-theme="light"] .adopcion-row {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.app[data-theme="light"] .adopcion-row__id {
+  color: var(--primary);
+}
+
+/* ── Tarjetas de mascotas ── */
+.app[data-theme="light"] .mascota-card {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.app[data-theme="light"] .mascota-card__name {
+  color: var(--text);
+}
+
+/* ── Badges de especie ── */
+.app[data-theme="light"] .especie-badge--canino  { background: rgba(21,101,192,0.12); color: #1565c0; }
+.app[data-theme="light"] .especie-badge--felino  { background: rgba(106,27,154,0.12); color: #6a1b9a; }
+.app[data-theme="light"] .especie-badge--ave     { background: rgba(245,124,0,0.12);  color: #e65100; }
+.app[data-theme="light"] .especie-badge--roedor  { background: rgba(46,125,50,0.12);  color: #2e7d32; }
+.app[data-theme="light"] .especie-badge--otro    { background: rgba(12,20,36,0.08);   color: rgba(12,20,36,0.6); }
+
+/* ── Tags adopted/available ── */
+.app[data-theme="light"] .adopted-tag {
+  background: rgba(198,40,40,0.1);
+  color: #b71c1c;
+}
+
+.app[data-theme="light"] .available-tag {
+  background: rgba(46,125,50,0.1);
+  color: #2e7d32;
+}
+
+/* ── Stat cards del panel de bienvenida ── */
+.app[data-theme="light"] .stat-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.app[data-theme="light"] .stat-card__number {
+  color: var(--primary);
+}
+
+.app[data-theme="light"] .stat-card__label {
+  color: var(--text-muted);
+}
+
+/* ── Panel de bienvenida ── */
+.app[data-theme="light"] .welcome-panel__title {
+  color: var(--text);
+}
+
+.app[data-theme="light"] .welcome-panel__desc {
+  color: var(--text-muted);
+}
+
+/* ── Toolbar de listados ── */
+.app[data-theme="light"] .listToolbar .formLabel {
+  color: var(--text);
+}
+
+/* ── Modal dialog ── */
+.app[data-theme="light"] .modalDialog {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.app[data-theme="light"] .modalDialog--form {
+  background: var(--form-surface);
+}
+
+.app[data-theme="light"] .modalDialog__title {
+  color: var(--text);
+}
+
+.app[data-theme="light"] .modalDialog__counter {
+  color: var(--text-muted);
+}
+
+/* ── Toast ── */
+.app[data-theme="light"] #toast {
+  background: rgba(12, 20, 36, 0.88);
+  color: #ffffff;
+}
+
+/* ── Profile sidebar ── */
+.app[data-theme="light"] .profile__title,
+.app[data-theme="light"] .profile__label,
+.app[data-theme="light"] .profile__previewLabel,
+.app[data-theme="light"] #userNamePreview {
+  color: var(--text);
+}
+
+/* ── Subtítulos y labels del formulario ── */
+.app[data-theme="light"] .formLabel {
+  color: var(--text);
+}
+
+.app[data-theme="light"] .formHelp {
+  color: var(--text-muted);
+}
+
+.app[data-theme="light"] .requiredMark {
+  color: #c62828;
+}
+
+/* ── Counter badge ── */
+.app[data-theme="light"] .modalDialog__counter {
+  background: rgba(21, 101, 192, 0.1);
+  color: var(--primary);
+  border-color: rgba(21, 101, 192, 0.2);
+}
+
+/* ── Adjuntos: pill ── */
+.app[data-theme="light"] .adjunto-pill {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(21, 101, 192, 0.06);
+}
+
+.app[data-theme="light"] .adjunto-pill:hover {
+  background: rgba(21, 101, 192, 0.14);
+}
+
+.app[data-theme="light"] .adjunto-pill--active {
+  background: rgba(21, 101, 192, 0.14);
+  font-weight: 700;
+}
+
+/* ── Adjuntos: zona upload ── */
+.app[data-theme="light"] .adjunto-zona-upload {
+  background: rgba(21, 101, 192, 0.04);
+  border-color: var(--primary);
+}
+
+.app[data-theme="light"] .adjunto-zona-upload:hover {
+  background: rgba(21, 101, 192, 0.1);
+}
+
+/* ── Adjuntos: card ── */
+.app[data-theme="light"] .adjunto-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.app[data-theme="light"] .adjunto-card:hover {
+  background: var(--surface-2);
+}
+
+.app[data-theme="light"] .adjunto-card__nombre {
+  color: var(--text);
+}
+
+.app[data-theme="light"] .adjunto-card__fecha {
+  color: var(--text-muted);
+}
+
+/* ── Vista previa TXT ── */
+.app[data-theme="light"] #adjuntoVistaPreviaContenido {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* ── Sidebar sublist items ── */
+.app[data-theme="light"] .nav__subitem .nav__text {
+  color: var(--text);
+}
+
+/* ── Heading del sidebar ── */
+.app[data-theme="light"] .sidebar__heading {
+  color: var(--text);
+}
+
+/* ── Logout button en sidebar ── */
+.app[data-theme="light"] .sidebar .button--danger {
+  background: #c62828;
+  color: #ffffff;
+  border-color: #c62828;
+}

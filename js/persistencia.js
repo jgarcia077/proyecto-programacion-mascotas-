@@ -272,6 +272,80 @@ function descargarAdjunto(nombreArchivo, contenido) {
 }
 
 /* ============================================================
+   HELPER: ZONA DE UPLOAD PERSONALIZADA
+   ============================================================ */
+
+/**
+ * Crea un input[type=file] oculto + botón visible estilizado + label de nombre.
+ * Al seleccionar archivo ejecuta el callback onChange(file).
+ *
+ * Reemplaza el input nativo que es poco visible y difiere entre navegadores.
+ *
+ * @param {Function} onChange - recibe el objeto File seleccionado
+ * @returns {{ wrapper: HTMLElement, resetInput: Function }}
+ */
+function crearZonaUpload(onChange) {
+  /* Contenedor principal */
+  const wrapper = document.createElement("div");
+  wrapper.className = "adjunto-zona-upload";
+
+  /* Input real oculto */
+  const inputOculto = document.createElement("input");
+  inputOculto.type   = "file";
+  inputOculto.accept = ".txt,text/plain";
+  inputOculto.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;";
+
+  /* Botón visible */
+  const btn = document.createElement("button");
+  btn.type      = "button";
+  btn.className = "button";
+  btn.style.cssText = [
+    "display:inline-flex",
+    "align-items:center",
+    "gap:6px",
+    "font-size:0.8rem",
+    "padding:6px 14px",
+    "flex-shrink:0",
+    "white-space:nowrap",
+  ].join(";");
+  btn.innerHTML = "&#128206; Subir .txt";
+  btn.addEventListener("click", () => inputOculto.click());
+
+  /* Nombre del archivo seleccionado */
+  const labelNombre = document.createElement("span");
+  labelNombre.style.cssText = [
+    "font-size:0.78rem",
+    "color:var(--text-muted)",
+    "overflow:hidden",
+    "text-overflow:ellipsis",
+    "white-space:nowrap",
+    "flex:1",
+  ].join(";");
+  labelNombre.textContent = "Ningún archivo seleccionado";
+
+  inputOculto.addEventListener("change", () => {
+    const archivo = inputOculto.files?.[0];
+    if (!archivo) return;
+    labelNombre.textContent = archivo.name;
+    labelNombre.style.color = "var(--text)";
+    onChange(archivo);
+  });
+
+  wrapper.appendChild(inputOculto);
+  wrapper.appendChild(btn);
+  wrapper.appendChild(labelNombre);
+
+  /* resetInput: limpia el input y restaura el label */
+  function resetInput() {
+    inputOculto.value       = "";
+    labelNombre.textContent = "Ningún archivo seleccionado";
+    labelNombre.style.color = "var(--text-muted)";
+  }
+
+  return { wrapper, resetInput };
+}
+
+/* ============================================================
    INYECCIÓN DE CONTROLES DE ADJUNTO EN FORMULARIOS
    ============================================================ */
 
@@ -313,79 +387,99 @@ function crearBloqueAdjunto(idInput, idListado, labelText) {
 }
 
 /**
- * Renderiza la lista de archivos adjuntos de una entidad dentro de un contenedor.
- * Cada fila tiene: nombre, fecha, botón Ver, botón Descargar, botón Eliminar.
+ * Renderiza la lista de archivos adjuntos dentro de un contenedor.
+ * Cada tarjeta muestra: icono, nombre, fecha, botones Ver / Descargar / Eliminar.
  *
- * @param {string} tipo       - "clientes" o "adopciones"
- * @param {number} idEntidad
- * @param {HTMLElement} contenedorNode
+ * @param {string}      tipo           - "clientes" o "adopciones"
+ * @param {number}      idEntidad
+ * @param {HTMLElement} contenedorNode - nodo donde se renderizan las tarjetas
+ * @param {Function}    [onEliminar]   - callback opcional tras eliminar un archivo
  */
-function renderizarAdjuntos(tipo, idEntidad, contenedorNode) {
+function renderizarAdjuntos(tipo, idEntidad, contenedorNode, onEliminar) {
   if (!contenedorNode) return;
-  contenedorNode.textContent = ""; /* limpiar sin innerHTML */
+  contenedorNode.textContent = "";
 
   const adjuntos = getAdjuntosPorEntidad(tipo, idEntidad);
 
   if (adjuntos.length === 0) {
-    const sinArchivos = document.createElement("p");
-    sinArchivos.className = "formHelp";
-    sinArchivos.style.fontSize = "0.8rem";
-    sinArchivos.textContent = "Sin archivos adjuntos aún.";
-    contenedorNode.appendChild(sinArchivos);
+    const vacio = document.createElement("div");
+    vacio.className = "adjunto-vacio";
+    const vaciIcon = document.createElement("span");
+    vaciIcon.style.cssText = "font-size:2rem;opacity:0.5;";
+    vaciIcon.textContent = "📂";
+    const vaciText = document.createElement("span");
+    vaciText.textContent = "Sin archivos adjuntos";
+    vacio.appendChild(vaciIcon);
+    vacio.appendChild(vaciText);
+    contenedorNode.appendChild(vacio);
     return;
   }
 
   adjuntos.forEach((adj) => {
-    const fila = document.createElement("div");
-    fila.style.cssText = "display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--control);border:1px solid var(--border);border-radius:6px;padding:6px 10px;";
+    const card = document.createElement("div");
+    card.className = "adjunto-card";
 
-    const nombreSpan = document.createElement("span");
-    nombreSpan.style.cssText = "flex:1;font-size:0.82rem;color:var(--text);word-break:break-all;";
-    nombreSpan.textContent = `📄 ${adj.nombre}`;
+    /* Icono */
+    const icono = document.createElement("span");
+    icono.textContent = "📄";
+    icono.style.fontSize = "1.4rem";
 
-    const fechaSpan = document.createElement("span");
-    fechaSpan.style.cssText = "font-size:0.75rem;color:var(--text-muted);";
-    fechaSpan.textContent = adj.fechaSubida;
+    /* Info: nombre + fecha */
+    const info = document.createElement("div");
+    info.style.cssText = "display:flex;flex-direction:column;gap:2px;min-width:0;";
+
+    const nombre = document.createElement("span");
+    nombre.className = "adjunto-card__nombre";
+    nombre.textContent = adj.nombre;
+
+    const fecha = document.createElement("span");
+    fecha.className = "adjunto-card__fecha";
+    fecha.textContent = `Subido: ${adj.fechaSubida}`;
+
+    info.appendChild(nombre);
+    info.appendChild(fecha);
+
+    /* Acciones */
+    const acciones = document.createElement("div");
+    acciones.className = "adjunto-card__acciones";
 
     const btnVer = document.createElement("button");
     btnVer.className = "button";
     btnVer.type = "button";
-    btnVer.style.cssText = "font-size:0.75rem;padding:3px 8px;";
-    btnVer.textContent = "Ver";
-    btnVer.addEventListener("click", () => {
-      mostrarModalVistaPrevia(adj.nombre, adj.contenido);
-    });
+    btnVer.title = "Ver contenido";
+    btnVer.style.cssText = "font-size:0.75rem;padding:4px 10px;width:auto;";
+    btnVer.textContent = "👁 Ver";
+    btnVer.addEventListener("click", () => mostrarModalVistaPrevia(adj.nombre, adj.contenido));
 
-    const btnDescargar = document.createElement("button");
-    btnDescargar.className = "button";
-    btnDescargar.type = "button";
-    btnDescargar.style.cssText = "font-size:0.75rem;padding:3px 8px;";
-    btnDescargar.textContent = "⬇ Descargar";
-    btnDescargar.addEventListener("click", () => {
-      descargarAdjunto(adj.nombre, adj.contenido);
-    });
+    const btnDesc = document.createElement("button");
+    btnDesc.className = "button";
+    btnDesc.type = "button";
+    btnDesc.title = "Descargar";
+    btnDesc.style.cssText = "font-size:0.75rem;padding:4px 10px;width:auto;";
+    btnDesc.textContent = "⬇";
+    btnDesc.addEventListener("click", () => descargarAdjunto(adj.nombre, adj.contenido));
 
-    const btnEliminar = document.createElement("button");
-    btnEliminar.className = "button button--danger";
-    btnEliminar.type = "button";
-    btnEliminar.style.cssText = "font-size:0.75rem;padding:3px 8px;";
-    btnEliminar.textContent = "✕";
-    btnEliminar.title = "Eliminar adjunto";
-    btnEliminar.addEventListener("click", () => {
+    const btnDel = document.createElement("button");
+    btnDel.className = "button button--danger";
+    btnDel.type = "button";
+    btnDel.title = "Eliminar adjunto";
+    btnDel.style.cssText = "font-size:0.75rem;padding:4px 8px;width:auto;";
+    btnDel.textContent = "✕";
+    btnDel.addEventListener("click", () => {
       eliminarAdjunto(tipo, idEntidad, adj.nombre);
-      renderizarAdjuntos(tipo, idEntidad, contenedorNode);
-      showToast({
-        toastNode: document.getElementById("toast"),
-        message: `🗑 Archivo "${adj.nombre}" eliminado.`,
-      });
+      renderizarAdjuntos(tipo, idEntidad, contenedorNode, onEliminar);
+      if (typeof onEliminar === "function") onEliminar();
+      showToast({ toastNode: document.getElementById("toast"), message: `🗑 "${adj.nombre}" eliminado.` });
     });
 
-    fila.appendChild(nombreSpan);
-    fila.appendChild(fechaSpan);
-    fila.appendChild(btnVer);
-    fila.appendChild(btnDescargar);
-    fila.appendChild(btnEliminar);
-    contenedorNode.appendChild(fila);
+    acciones.appendChild(btnVer);
+    acciones.appendChild(btnDesc);
+    acciones.appendChild(btnDel);
+
+    card.appendChild(icono);
+    card.appendChild(info);
+    card.appendChild(acciones);
+    contenedorNode.appendChild(card);
   });
 }
 
@@ -400,49 +494,65 @@ function renderizarAdjuntos(tipo, idEntidad, contenedorNode) {
 function asegurarModalVistaPrevia() {
   if (document.getElementById("adjuntoVistaPreviaModal")) return;
 
+  /*
+   * Usa .modalOverlay sin --main para que el fondo oscuro cubra TODA
+   * la pantalla (sidebar + topbar) y el dialog quede centrado.
+   * z-index:200 garantiza que esté por encima de los otros modales (z-index:80).
+   */
   const overlay = document.createElement("div");
   overlay.id        = "adjuntoVistaPreviaModal";
-  overlay.className = "modalOverlay modalOverlay--main";
+  overlay.className = "modalOverlay";
   overlay.hidden    = true;
   overlay.setAttribute("aria-hidden", "true");
   overlay.setAttribute("aria-label",  "Vista previa de archivo adjunto");
+  overlay.style.zIndex = "200";
 
   const dialog = document.createElement("div");
   dialog.className = "modalDialog";
   dialog.setAttribute("role",       "dialog");
   dialog.setAttribute("aria-modal", "true");
-  dialog.style.maxWidth = "700px";
+  dialog.setAttribute("aria-labelledby", "adjuntoVistaPreviaTitulo");
+  dialog.style.cssText = "width:min(680px,calc(100vw - 48px));max-height:85vh;display:flex;flex-direction:column;";
 
+  /* Título */
   const titleRow = document.createElement("div");
-  titleRow.className = "modalDialog__titleRow";
+  titleRow.className        = "modalDialog__titleRow";
+  titleRow.style.flexShrink = "0";
 
   const title = document.createElement("h2");
-  title.className = "modalDialog__title";
-  title.id        = "adjuntoVistaPreviaTitulo";
+  title.className   = "modalDialog__title";
+  title.id          = "adjuntoVistaPreviaTitulo";
   title.textContent = "📄 Vista previa";
 
   titleRow.appendChild(title);
   dialog.appendChild(titleRow);
 
+  /* Área de texto con scroll interno */
   const pre = document.createElement("pre");
   pre.id = "adjuntoVistaPreviaContenido";
   pre.style.cssText = [
+    "flex:1",
+    "overflow:auto",
     "background:var(--control)",
     "border:1px solid var(--border)",
     "border-radius:8px",
     "padding:16px",
-    "overflow:auto",
-    "max-height:55vh",
+    "margin:var(--space-3) 0 0",
     "font-size:0.82rem",
+    "font-family:monospace",
     "color:var(--text)",
     "white-space:pre-wrap",
     "word-break:break-word",
+    "line-height:1.6",
+    "min-height:80px",
+    "max-height:60vh",
   ].join(";");
   dialog.appendChild(pre);
 
+  /* Botón cerrar */
   const footer = document.createElement("div");
-  footer.className = "formActions";
-  footer.style.marginTop = "16px";
+  footer.className     = "formActions";
+  footer.style.cssText = "margin-top:var(--space-3);flex-shrink:0;";
 
   const btnCerrar = document.createElement("button");
   btnCerrar.className   = "button button--success";
@@ -454,9 +564,14 @@ function asegurarModalVistaPrevia() {
   dialog.appendChild(footer);
   overlay.appendChild(dialog);
 
-  /* Cerrar al hacer clic en el overlay (fuera del dialog) */
+  /* Cerrar al hacer clic fuera del dialog */
   overlay.addEventListener("click", (ev) => {
     if (ev.target === overlay) cerrarModalVistaPrevia();
+  });
+
+  /* Cerrar con Escape */
+  overlay.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") cerrarModalVistaPrevia();
   });
 
   document.body.appendChild(overlay);
@@ -485,6 +600,148 @@ function mostrarModalVistaPrevia(nombreArchivo, contenido) {
 function cerrarModalVistaPrevia() {
   const modalNode = document.getElementById("adjuntoVistaPreviaModal");
   if (modalNode) closeModal(modalNode, null);
+}
+
+/* ============================================================
+   MODAL DE GESTIÓN DE ADJUNTOS (reutilizable para clientes y adopciones)
+   ============================================================ */
+
+/**
+ * Crea (una sola vez) el modal de gestión de adjuntos en el DOM.
+ * Se reutiliza en cada apertura actualizando su título y contenido.
+ */
+function asegurarModalAdjuntos() {
+  if (document.getElementById("adjuntosGestionModal")) return;
+
+  const overlay = document.createElement("div");
+  overlay.id        = "adjuntosGestionModal";
+  overlay.className = "modalOverlay";
+  overlay.hidden    = true;
+  overlay.setAttribute("aria-hidden", "true");
+  overlay.style.zIndex = "200";
+
+  const dialog = document.createElement("div");
+  dialog.className = "modalDialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "adjuntosGestionTitulo");
+  dialog.style.cssText = "width:min(560px,calc(100vw - 48px));max-height:85vh;display:flex;flex-direction:column;gap:0;";
+
+  /* Título */
+  const titleRow = document.createElement("div");
+  titleRow.className        = "modalDialog__titleRow";
+  titleRow.style.flexShrink = "0";
+
+  const titleEl = document.createElement("h2");
+  titleEl.id          = "adjuntosGestionTitulo";
+  titleEl.className   = "modalDialog__title";
+  titleEl.textContent = "📎 Archivos adjuntos";
+  titleRow.appendChild(titleEl);
+  dialog.appendChild(titleRow);
+
+  /* Descripción del registro */
+  const subtituloEl = document.createElement("p");
+  subtituloEl.id            = "adjuntosGestionSubtitulo";
+  subtituloEl.className     = "formHelp";
+  subtituloEl.style.cssText = "margin:8px 0 0;font-size:0.82rem;flex-shrink:0;";
+  dialog.appendChild(subtituloEl);
+
+  /* Separador */
+  const sep = document.createElement("div");
+  sep.style.cssText = "height:1px;background:var(--border);margin:12px 0;flex-shrink:0;";
+  dialog.appendChild(sep);
+
+  /* Listado de adjuntos con scroll */
+  const listadoEl = document.createElement("div");
+  listadoEl.id          = "adjuntosGestionListado";
+  listadoEl.style.cssText = "flex:1;overflow-y:auto;min-height:60px;max-height:42vh;padding-right:4px;";
+  dialog.appendChild(listadoEl);
+
+  /* Zona de upload */
+  const sepUpload = document.createElement("div");
+  sepUpload.style.cssText = "height:1px;background:var(--border);margin:12px 0;flex-shrink:0;";
+  dialog.appendChild(sepUpload);
+
+  const uploadLabel = document.createElement("p");
+  uploadLabel.className     = "formLabel";
+  uploadLabel.style.cssText = "margin-bottom:6px;flex-shrink:0;";
+  uploadLabel.textContent   = "Adjuntar nuevo archivo (.txt)";
+  dialog.appendChild(uploadLabel);
+
+  const uploadZoneEl = document.createElement("div");
+  uploadZoneEl.id           = "adjuntosGestionUpload";
+  uploadZoneEl.style.flexShrink = "0";
+  dialog.appendChild(uploadZoneEl);
+
+  /* Footer con botón cerrar */
+  const footer = document.createElement("div");
+  footer.className     = "formActions";
+  footer.style.cssText = "margin-top:16px;flex-shrink:0;";
+
+  const btnCerrar = document.createElement("button");
+  btnCerrar.className   = "button button--success";
+  btnCerrar.type        = "button";
+  btnCerrar.textContent = "Cerrar";
+  btnCerrar.addEventListener("click", () => {
+    closeModal(overlay, null);
+  });
+
+  footer.appendChild(btnCerrar);
+  dialog.appendChild(footer);
+  overlay.appendChild(dialog);
+
+  overlay.addEventListener("click", (ev) => {
+    if (ev.target === overlay) closeModal(overlay, null);
+  });
+  overlay.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") closeModal(overlay, null);
+  });
+
+  document.body.appendChild(overlay);
+}
+
+/**
+ * Abre el modal de gestión de adjuntos para una entidad concreta.
+ *
+ * @param {string}   tipo         - "clientes" o "adopciones"
+ * @param {number}   idEntidad    - id del cliente o adopción
+ * @param {string}   subtitulo    - texto descriptivo (ej: nombre del cliente)
+ * @param {Function} onCambio     - callback para actualizar el badge del botón 📎
+ */
+function abrirModalAdjuntos(tipo, idEntidad, subtitulo, onCambio) {
+  asegurarModalAdjuntos();
+
+  const modalNode   = document.getElementById("adjuntosGestionModal");
+  const subtituloEl = document.getElementById("adjuntosGestionSubtitulo");
+  const listadoEl   = document.getElementById("adjuntosGestionListado");
+  const uploadZone  = document.getElementById("adjuntosGestionUpload");
+
+  /* Actualizar subtítulo */
+  subtituloEl.textContent = subtitulo;
+
+  /* Renderizar listado actual */
+  renderizarAdjuntos(tipo, idEntidad, listadoEl, () => {
+    if (typeof onCambio === "function") onCambio();
+  });
+
+  /* Zona de upload: re-crear cada vez para limpiar estado anterior */
+  uploadZone.textContent = "";
+  const { wrapper, resetInput } = crearZonaUpload((archivo) => {
+    adjuntarArchivoTxt(archivo, tipo, idEntidad, (nombre) => {
+      resetInput();
+      renderizarAdjuntos(tipo, idEntidad, listadoEl, () => {
+        if (typeof onCambio === "function") onCambio();
+      });
+      if (typeof onCambio === "function") onCambio();
+      showToast({
+        toastNode: document.getElementById("toast"),
+        message: `📎 "${nombre}" adjuntado correctamente.`,
+      });
+    });
+  });
+  uploadZone.appendChild(wrapper);
+
+  openModal(modalNode, modalNode.querySelector(".button--success"));
 }
 
 /* ============================================================
@@ -538,7 +795,7 @@ function renderListClientsConAdjuntos() {
   const headerRow = document.createElement("div");
   headerRow.className = "clientsTable__header";
   headerRow.setAttribute("role", "row");
-  ["ID", "Identificación", "Nombres", "Email", "Depto.", "Municipio", "Barrio", "Dirección", "WhatsApp", "Teléfono", "Archivos"].forEach((txt) => {
+  ["ID", "Identificación", "Nombres", "Email", "Depto.", "Municipio", "Barrio", "Dirección", "WhatsApp", "Teléfono"].forEach((txt) => {
     const cell = document.createElement("div");
     cell.className = "clientsTable__cell";
     cell.setAttribute("role", "columnheader");
@@ -553,8 +810,43 @@ function renderListClientsConAdjuntos() {
     rowNode.className = "clientsTable__row";
     rowNode.setAttribute("role", "row");
 
+    /* Primera celda: ID + botón adjuntos */
+    const idCell = document.createElement("div");
+    idCell.className = "clientsTable__cell";
+    idCell.setAttribute("role", "cell");
+    idCell.style.cssText = "display:flex;flex-direction:column;align-items:flex-start;gap:4px;overflow:visible;";
+
+    const idSpan = document.createElement("span");
+    idSpan.textContent = String(c?.idCliente ?? "");
+    idSpan.style.fontWeight = "700";
+
+    const btnAdj = document.createElement("button");
+    btnAdj.type      = "button";
+    btnAdj.className = "adjunto-pill";
+
+    function actualizarBadgeCliente() {
+      const n = getAdjuntosPorEntidad("clientes", c.idCliente).length;
+      btnAdj.textContent = "";
+      btnAdj.appendChild(document.createTextNode(n > 0 ? `📎 ${n}` : "📎 adjuntar"));
+      btnAdj.classList.toggle("adjunto-pill--active", n > 0);
+    }
+    actualizarBadgeCliente();
+
+    btnAdj.addEventListener("click", () => {
+      abrirModalAdjuntos(
+        "clientes",
+        c.idCliente,
+        `${c.nombres}  ·  ID ${c.identificacion}`,
+        actualizarBadgeCliente
+      );
+    });
+
+    idCell.appendChild(idSpan);
+    idCell.appendChild(btnAdj);
+    rowNode.appendChild(idCell);
+
+    /* Resto de columnas */
     [
-      String(c?.idCliente       ?? ""),
       String(c?.identificacion  ?? ""),
       String(c?.nombres         ?? ""),
       String(c?.email           ?? ""),
@@ -571,57 +863,6 @@ function renderListClientsConAdjuntos() {
       cell.textContent = val;
       rowNode.appendChild(cell);
     });
-
-    /* Celda de adjuntos */
-    const adjCell = document.createElement("div");
-    adjCell.className = "clientsTable__cell";
-    adjCell.setAttribute("role", "cell");
-
-    const countAdj = getAdjuntosPorEntidad("clientes", c.idCliente).length;
-
-    const btnAdj = document.createElement("button");
-    btnAdj.className   = "button";
-    btnAdj.type        = "button";
-    btnAdj.style.fontSize = "0.75rem";
-    btnAdj.textContent = `📎 ${countAdj}`;
-    btnAdj.title       = "Ver / agregar archivos adjuntos";
-
-    /* Panel expandible de adjuntos (oculto por defecto) */
-    const panelAdj = document.createElement("div");
-    panelAdj.hidden = true;
-    panelAdj.style.cssText = "margin-top:8px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;";
-
-    const listadoAdj = document.createElement("div");
-    listadoAdj.className = "adjuntos-listado-inline";
-
-    const inputAdj = document.createElement("input");
-    inputAdj.type   = "file";
-    inputAdj.accept = ".txt,text/plain";
-    inputAdj.style.cssText = "margin-top:8px;width:100%;font-size:0.8rem;";
-
-    inputAdj.addEventListener("change", () => {
-      const archivo = inputAdj.files?.[0];
-      if (!archivo) return;
-      adjuntarArchivoTxt(archivo, "clientes", c.idCliente, (nombre) => {
-        inputAdj.value = "";
-        btnAdj.textContent = `📎 ${getAdjuntosPorEntidad("clientes", c.idCliente).length}`;
-        renderizarAdjuntos("clientes", c.idCliente, listadoAdj);
-        showToast({ toastNode: document.getElementById("toast"), message: `📎 Archivo "${nombre}" adjuntado al cliente.` });
-      });
-    });
-
-    btnAdj.addEventListener("click", () => {
-      panelAdj.hidden = !panelAdj.hidden;
-      if (!panelAdj.hidden) {
-        renderizarAdjuntos("clientes", c.idCliente, listadoAdj);
-      }
-    });
-
-    panelAdj.appendChild(listadoAdj);
-    panelAdj.appendChild(inputAdj);
-    adjCell.appendChild(btnAdj);
-    adjCell.appendChild(panelAdj);
-    rowNode.appendChild(adjCell);
 
     listNode.appendChild(rowNode);
   });
@@ -680,13 +921,13 @@ function renderListAdopcionesConAdjuntos() {
     return;
   }
 
-  /* Cabecera con columna adicional */
+  /* Cabecera: sin columna extra, el botón va dentro de la celda ID */
   const headerRow = document.createElement("div");
   headerRow.className   = "adopcion-row";
   headerRow.setAttribute("role", "row");
-  headerRow.style.cssText = "font-weight:700;border-bottom:2px solid var(--primary);grid-template-columns:60px 1fr 1fr 90px 70px;";
+  headerRow.style.cssText = "font-weight:700;border-bottom:2px solid var(--primary);";
 
-  ["ID", "Cliente", "Mascota", "Fecha", "Archivos"].forEach((lbl) => {
+  ["ID", "Cliente", "Mascota", "Fecha"].forEach((lbl) => {
     const cell = document.createElement("div");
     cell.setAttribute("role", "columnheader");
     cell.textContent = lbl;
@@ -698,11 +939,38 @@ function renderListAdopcionesConAdjuntos() {
     const row = document.createElement("div");
     row.className   = "adopcion-row";
     row.setAttribute("role", "row");
-    row.style.gridTemplateColumns = "60px 1fr 1fr 90px 70px";
 
+    /* Celda ID + botón adjuntos integrado */
     const idCell = document.createElement("div");
     idCell.className = "adopcion-row__id";
-    setSafeText(idCell, `#${String(r.idAdopcion).padStart(4, "0")}`);
+    idCell.style.cssText = "display:flex;flex-direction:column;align-items:flex-start;gap:4px;overflow:visible;";
+
+    const idSpan = document.createElement("span");
+    setSafeText(idSpan, `#${String(r.idAdopcion).padStart(4, "0")}`);
+
+    const btnAdj = document.createElement("button");
+    btnAdj.type = "button";
+    btnAdj.className = "adjunto-pill";
+
+    function actualizarBadgeAdopcion() {
+      const n = getAdjuntosPorEntidad("adopciones", r.idAdopcion).length;
+      btnAdj.textContent = "";
+      btnAdj.appendChild(document.createTextNode(n > 0 ? `📎 ${n}` : "📎 adjuntar"));
+      btnAdj.classList.toggle("adjunto-pill--active", n > 0);
+    }
+    actualizarBadgeAdopcion();
+
+    btnAdj.addEventListener("click", () => {
+      abrirModalAdjuntos(
+        "adopciones",
+        r.idAdopcion,
+        `Adopción #${String(r.idAdopcion).padStart(4,"0")}  ·  ${r.clienteNombre} → ${r.mascotaNombre}`,
+        actualizarBadgeAdopcion
+      );
+    });
+
+    idCell.appendChild(idSpan);
+    idCell.appendChild(btnAdj);
 
     const clienteCell = document.createElement("div");
     setSafeText(clienteCell, r.clienteNombre);
@@ -713,59 +981,11 @@ function renderListAdopcionesConAdjuntos() {
     const fechaCell = document.createElement("div");
     setSafeText(fechaCell, r.fechaAdopcion);
 
-    /* Celda de adjuntos */
-    const adjCell   = document.createElement("div");
-    const countAdj  = getAdjuntosPorEntidad("adopciones", r.idAdopcion).length;
-    const btnAdj    = document.createElement("button");
-    btnAdj.className   = "button";
-    btnAdj.type        = "button";
-    btnAdj.style.fontSize = "0.72rem";
-    btnAdj.textContent = `📎 ${countAdj}`;
-    btnAdj.title       = "Ver / agregar archivos adjuntos";
-
-    const panelAdj  = document.createElement("div");
-    panelAdj.hidden = true;
-    panelAdj.style.cssText = "margin-top:8px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;grid-column:1/-1;";
-
-    const listadoAdj = document.createElement("div");
-
-    const inputAdj  = document.createElement("input");
-    inputAdj.type   = "file";
-    inputAdj.accept = ".txt,text/plain";
-    inputAdj.style.cssText = "margin-top:8px;width:100%;font-size:0.8rem;";
-
-    inputAdj.addEventListener("change", () => {
-      const archivo = inputAdj.files?.[0];
-      if (!archivo) return;
-      adjuntarArchivoTxt(archivo, "adopciones", r.idAdopcion, (nombre) => {
-        inputAdj.value = "";
-        btnAdj.textContent = `📎 ${getAdjuntosPorEntidad("adopciones", r.idAdopcion).length}`;
-        renderizarAdjuntos("adopciones", r.idAdopcion, listadoAdj);
-        showToast({ toastNode: document.getElementById("toast"), message: `📎 "${nombre}" adjuntado a la adopción.` });
-      });
-    });
-
-    btnAdj.addEventListener("click", () => {
-      panelAdj.hidden = !panelAdj.hidden;
-      if (!panelAdj.hidden) renderizarAdjuntos("adopciones", r.idAdopcion, listadoAdj);
-    });
-
-    panelAdj.appendChild(listadoAdj);
-    panelAdj.appendChild(inputAdj);
-    adjCell.appendChild(btnAdj);
-
     row.appendChild(idCell);
     row.appendChild(clienteCell);
     row.appendChild(mascotaCell);
     row.appendChild(fechaCell);
-    row.appendChild(adjCell);
     listNode.appendChild(row);
-
-    /* El panel expandible se pone después de la fila en el contenedor */
-    const panelWrapper = document.createElement("div");
-    panelWrapper.style.gridColumn = "1/-1";
-    panelWrapper.appendChild(panelAdj);
-    listNode.appendChild(panelWrapper);
   });
 
   setSafeText(listAdopcionesUiContext.countBadge, `#Adopciones ${String(rows.length).padStart(4, "0")}`);

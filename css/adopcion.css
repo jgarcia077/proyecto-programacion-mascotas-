@@ -269,3 +269,125 @@
     font-size: 0.8rem;
   }
 }
+
+/* ===== PILL DE ADJUNTOS (clientes y adopciones) ===== */
+/*
+ * Botón pequeño tipo pill que aparece bajo el ID en cada fila.
+ * Usa variables CSS del tema para funcionar correctamente en
+ * modo oscuro y modo claro sin colores hardcodeados.
+ */
+.adjunto-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  background: var(--control);
+  color: var(--primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  width: auto;          /* anula el width:100% de .button */
+  text-align: left;
+}
+
+.adjunto-pill:hover {
+  background: var(--hover);
+  border-color: var(--primary-2);
+  color: var(--primary-2);
+}
+
+/* Con archivos adjuntos: pill más destacado */
+.adjunto-pill--active {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.adjunto-pill--active:hover {
+  background: color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+/* ===== ZONA DE UPLOAD (subir .txt) ===== */
+/*
+ * Contenedor con borde punteado que envuelve el input oculto
+ * y el botón visible. Se ve bien en ambos temas.
+ */
+.adjunto-zona-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--control);
+  border: 1.5px dashed var(--primary);
+  border-radius: 8px;
+  transition: background 0.15s, border-color 0.15s;
+  cursor: default;
+}
+
+.adjunto-zona-upload:hover {
+  background: var(--hover);
+  border-color: var(--primary-2);
+}
+
+/* ===== MODAL DE ADJUNTOS — separador ===== */
+.adjunto-separador {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+  flex-shrink: 0;
+}
+
+/* ===== TARJETA DE ARCHIVO ADJUNTO ===== */
+.adjunto-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--control);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: background 0.15s;
+}
+
+.adjunto-card:hover {
+  background: var(--hover);
+}
+
+.adjunto-card__nombre {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adjunto-card__fecha {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.adjunto-card__acciones {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ===== ESTADO VACÍO DE ADJUNTOS ===== */
+.adjunto-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
